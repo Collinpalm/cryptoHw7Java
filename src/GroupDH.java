@@ -1,13 +1,12 @@
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
 import java.lang.*;
-import java.math.*;
 import java.io.*;
 
 
 public class GroupDH {
     public static KeyNode root;
+    public static boolean flag = false;
     public static long p;
     public static long g;
 
@@ -21,6 +20,7 @@ public class GroupDH {
         g = Long.parseLong(splitLine[1]);
         int count = Integer.parseInt(br.readLine());
         for(int i = 0;i<count;i++){
+
             line = br.readLine();
             splitLine = line.split(" ");
             if(i == 0){
@@ -30,12 +30,14 @@ public class GroupDH {
                 int a = root.leftKid.key;
                 int b = root.rightKid.key;
                 root.key = (int)((Math.pow(g, (a*b)))%p);
-            }else if(splitLine[0] == "ADD"){
+            }else if(splitLine[0].equals("ADD")){
                 addUser(splitLine[1], Integer.parseInt(splitLine[2]), splitLine[3], Integer.parseInt(splitLine[4]), splitLine[5]);
-            }else if(splitLine[0] == "DEL"){
+            }else if(splitLine[0].equals("DEL")){
                 deleteUser(splitLine[1], Integer.parseInt(splitLine[2]));
-            }else if(splitLine[0] == "QUERY"){
+            }else if(splitLine[0].equals("QUERY")){
+                System.out.println(splitLine[1]);
                 query(splitLine[1]);
+
             }
         }
 
@@ -45,12 +47,16 @@ public class GroupDH {
         KeyNode sponsor = recurseKeyNode(sponsorName, root);
         sponsor.key = newKey1;
         KeyNode newShare = new KeyNode(sponsor.parent, sponsor, null,0, keyID );
-        sponsor.parent = newShare;
+        if(sponsor.parent.leftKid == sponsor){
+            sponsor.parent.leftKid = newShare;
+        }else if(sponsor.parent.rightKid == sponsor) {
+            sponsor.parent.rightKid = newShare;
+        }
         newShare.rightKid = new KeyNode(newShare, null, null, newKey2, newUserName);
         int a = newShare.leftKid.key;
         int b = newShare.rightKid.key;
         newShare.key = (int)((Math.pow(g, (a*b)))%p);
-        while(newShare != null){
+        while(newShare.parent != null){
             newShare = newShare.parent;
             a = newShare.leftKid.key;
             b = newShare.rightKid.key;
@@ -74,7 +80,7 @@ public class GroupDH {
         }
         int a, b;
         KeyNode newShare = survivor;
-        while(newShare != null){
+        while(newShare.parent != null){
             newShare = newShare.parent;
             a = newShare.leftKid.key;
             b = newShare.rightKid.key;
@@ -82,18 +88,21 @@ public class GroupDH {
         }
     }
     public static void query(String searchName){
-        System.out.println(recurseKeyNode(searchName, root).key);
+        KeyNode result = recurseKeyNode(searchName, root);
+        System.out.println("    "+result.name);
     }
     private static KeyNode recurseKeyNode(String target, KeyNode pos){
-        if(pos.name == target){
-            return pos;
+        if(pos != null) {
+            if (pos.name.equals(target)) {
+                return pos;
+            }else{
+                KeyNode temp = recurseKeyNode(target, pos.leftKid);
+                if(temp == null){
+                    temp = recurseKeyNode(target, pos.rightKid);
+                }
+                return temp;
+            }
         }
-        if(pos.leftKid != null)
-            return recurseKeyNode(target, pos.leftKid);
-        if(pos != null)
-            return pos;
-        if(pos.rightKid != null)
-            return recurseKeyNode(target, pos.rightKid);
 
         return null;
     }
