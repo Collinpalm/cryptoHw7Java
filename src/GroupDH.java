@@ -8,11 +8,11 @@ import java.io.*;
 
 public class GroupDH {
     public static KeyNode root;
-    long p;
-    long g;
+    public static long p;
+    public static long g;
 
     public static void main(String[] args)throws FileNotFoundException, IOException{
-        File file=new File(args[0]);
+        File file=new File("input.txt");
         FileReader fr=new FileReader(file);   //reads the file
         BufferedReader br=new BufferedReader(fr);
         String line = br.readLine();
@@ -49,10 +49,37 @@ public class GroupDH {
         newShare.rightKid = new KeyNode(newShare, null, null, newKey2, newUserName);
         int a = newShare.leftKid.key;
         int b = newShare.rightKid.key;
-        root.key = (int)((Math.pow(g, (a*b)))%p);
+        newShare.key = (int)((Math.pow(g, (a*b)))%p);
+        while(newShare != null){
+            newShare = newShare.parent;
+            a = newShare.leftKid.key;
+            b = newShare.rightKid.key;
+            newShare.key = (int)((Math.pow(g, (a*b)))%p);
+        }
     }
-    public static void deleteUser(String SponsorName, int newKey){
-
+    public static void deleteUser(String targetName, int newKey){
+        KeyNode survivor = recurseKeyNode(targetName, root);
+        if(survivor.parent.leftKid == survivor && survivor.parent.parent.leftKid == survivor.parent){
+            survivor.parent.rightKid = survivor.parent.parent.leftKid;
+            survivor = survivor.parent.rightKid;
+        }else if(survivor.parent.rightKid == survivor && survivor.parent.parent.leftKid == survivor.parent){
+            survivor.parent.leftKid = survivor.parent.parent.leftKid;
+            survivor = survivor.parent.leftKid;
+        }else if(survivor.parent.leftKid == survivor && survivor.parent.parent.rightKid == survivor.parent){
+            survivor.parent.rightKid = survivor.parent.parent.leftKid;
+            survivor = survivor.parent.rightKid;
+        }else if(survivor.parent.rightKid == survivor && survivor.parent.parent.rightKid == survivor.parent){
+            survivor.parent.leftKid = survivor.parent.parent.leftKid;
+            survivor = survivor.parent.leftKid;
+        }
+        int a, b;
+        KeyNode newShare = survivor;
+        while(newShare != null){
+            newShare = newShare.parent;
+            a = newShare.leftKid.key;
+            b = newShare.rightKid.key;
+            newShare.key = (int)((Math.pow(g, (a*b)))%p);
+        }
     }
     public static void query(String searchName){
         System.out.println(recurseKeyNode(searchName, root).key);
