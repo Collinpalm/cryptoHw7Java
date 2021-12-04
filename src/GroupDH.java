@@ -93,6 +93,7 @@ public class GroupDH {
     }
     private static KeyNode recurseKeyNode(String target, KeyNode pos){
         if(pos != null) {
+            System.out.println(pos.name);
             if (pos.name.equals(target)) {
                 return pos;
             }else{
