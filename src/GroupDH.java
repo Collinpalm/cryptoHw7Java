@@ -43,10 +43,22 @@ public class GroupDH {
 
     }
     public static void query(String searchName){
+        System.out.println(recurseKeyNode(searchName, root).name);
+    }
+    private static KeyNode recurseKeyNode(String target, KeyNode pos){
+        if(pos.name == target){
+            return pos;
+        }
+        if(pos.leftKid != null)
+            return recurseKeyNode(target, pos.leftKid);
+        if(pos != null)
+            return pos;
+        if(pos.rightKid != null)
+            return recurseKeyNode(target, pos.rightKid);
 
+        return null;
     }
 }
-
 
 //this is the shared key nodes class
 class KeyNode{
